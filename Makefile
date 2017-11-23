@@ -1,9 +1,7 @@
 CC=gcc
 CFLAGS= -Wall -pedantic
 
-all:
-	$(CC) $(CFLAGS) client.c -o client
-	$(CC) $(CFLAGS) server.c -o server
+all: server client
 
 client :
 	$(CC) $(CFLAGS) client.c -o client
@@ -17,6 +15,4 @@ del_server:
 del_client:
 	rm client
 
-clean:
-	rm client
-	rm server
+clean: del_client del_server

@@ -1,5 +1,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -8,9 +9,10 @@
 #include <errno.h>
 #include <string.h>
 
-#define BACKLOG         20
-#define SOCK_PORT       3000
+#define BACKLOG         0
+#define SOCK_PORT       3001
 #define BUF_SIZE        50
+#define PROC_LIMIT      5
 #define ACKNOWLODGE_MSG "Hello"
 
 #define error_handler(msg) \
@@ -20,7 +22,8 @@
 int main()
 {
     ssize_t bytes_recived, bytes_send;
-    int sock;
+    int sock, proc_counter;
+    pid_t process_id, ppid;
     char buffer[BUF_SIZE];
     struct sockaddr_in sock_addr, client_sock_addr;
     int tcp_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -38,6 +41,14 @@ int main()
     if (listen(tcp_sock, BACKLOG) < 0)
         error_handler("While making listening socket");
 
+    ppid = getpid();
+    // Creating processes
+    for (proc_counter = 0; proc_counter < PROC_LIMIT; ++proc_counter)
+        if (ppid == getpid())
+            fork();
+
+    process_id = getpid(); // retrive current pid
+
     while (1) {
         sock = accept(tcp_sock, (struct sockaddr *) &client_sock_addr,
                       &client_sock_len);
@@ -45,13 +56,17 @@ int main()
             error_handler("While creating socket");
 
         while ((bytes_recived = recv(sock, buffer, BUF_SIZE, 0)) > 0) {
-            printf("Received msg: %li:bytes %s\n", bytes_recived, buffer);
+            printf("Received msg: %i:process %li:bytes %s\n", process_id,
+                                                              bytes_recived,
+                                                              buffer);
             bytes_send = sendto(sock, ACKNOWLODGE_MSG, sizeof(ACKNOWLODGE_MSG), 0,
                                 (struct sockaddr *) &client_sock_addr,
                                 sizeof(client_sock_addr));
             if (bytes_send < 0)
                 error_handler("While sending data");
-            printf("Sent acknowledge msg: %li:bytes %s\n", bytes_send, ACKNOWLODGE_MSG);
+            printf("Sent acknowledge msg: %i:process %li:bytes %s\n", process_id,
+                                                                      bytes_send,
+                                                                      ACKNOWLODGE_MSG);
         }
 
         if (bytes_recived < 0)
@@ -60,5 +75,6 @@ int main()
 
     close(sock);
     close(tcp_sock);
+    waitpid(process_id, NULL, WNOHANG);
     return EXIT_SUCCESS;
 }

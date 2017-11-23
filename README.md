@@ -24,10 +24,6 @@ $ make del_client # delete client
 $ make clean      # delete all
 ```
 
-Don't forget to make script executable
-```
-$ chmod 755 debug.sh
-```
 ### Enjoy
 
 In order to debug you should run server and debug.sh in separate terminals using commands below.
