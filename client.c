@@ -21,32 +21,32 @@ int main()
 {
     ssize_t bytes_send, bytes_received;
     struct sockaddr_in sock_addr, serv_sock_addr;
-    int tcp_sock = socket(AF_INET, SOCK_STREAM, 0);
+    int udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
     char buffer[BUF_SIZE];
+    socklen_t addr_len;
 
-    if (tcp_sock < 0)
+    if (udp_sock < 0)
         error_handler("While creating socket");
 
     sock_addr.sin_family = AF_INET;
     sock_addr.sin_port = htons(SOCK_PORT);
     sock_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-    if (connect(tcp_sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) < 0)
-        error_handler("While binding socket");
-
-    bytes_send = sendto(tcp_sock, CLIENT_MSG, sizeof(CLIENT_MSG), 0,
-                        (struct sockaddr *) &serv_sock_addr,
-                        sizeof(serv_sock_addr));
+    bytes_send = sendto(udp_sock, CLIENT_MSG, sizeof(CLIENT_MSG), 0,
+                        (struct sockaddr *) &sock_addr,
+                        sizeof(sock_addr));
     if (bytes_send < 0)
         error_handler("While sending data");
     printf("Data sent: %li %s\n", bytes_send, CLIENT_MSG);
 
-    bytes_received = recv(tcp_sock, buffer, BUF_SIZE, 0);
+    bytes_received = recvfrom(udp_sock, buffer, BUF_SIZE, 0, 
+                              (struct sockaddr *) &serv_sock_addr, 
+                              &addr_len);
 
     if (bytes_received < 0)
             error_handler("While receiving data");
     printf("Data received: %li %s\n", bytes_received, buffer);
 
-    close(tcp_sock);
+    close(udp_sock);
     return EXIT_SUCCESS;
 }
