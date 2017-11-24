@@ -18,13 +18,15 @@
 
 int main()
 {
-    ssize_t bytes_recived, bytes_send;
+    ssize_t bytes_received, bytes_send;
     char buffer[BUF_SIZE];
     struct sockaddr_in sock_addr, client_sock_addr;
     int udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
-    socklen_t client_sock_len;
+    socklen_t client_sock_len = sizeof(client_sock_addr);
     if (udp_sock < 0)
         error_handler("While creating socket");
+
+    memset(&client_sock_addr, 0, sizeof(struct sockaddr_in));
 
     sock_addr.sin_family = AF_INET;
     sock_addr.sin_port = ntohs(SOCK_PORT);
@@ -34,21 +36,22 @@ int main()
         error_handler("While binding socket");
 
     while (1) {
-        bytes_recived = recvfrom(udp_sock, buffer, BUF_SIZE, 0, 
+        bytes_received = recvfrom(udp_sock, buffer, BUF_SIZE, 0, 
                                  (struct sockaddr *) &client_sock_addr, 
                                  &client_sock_len);
-        if (bytes_recived < 0)
+        if (bytes_received < 0)
             error_handler("While receiving data");
-        printf("Received msg: %li:bytes %s\n", bytes_recived, buffer);
+        printf("Received msg: %li:bytes %s\n", bytes_received, buffer);
 
-        //printf("%i\n", client_sock_addr.sin_family);
-        bytes_send = sendto(udp_sock, ACKNOWLODGE_MSG, sizeof(ACKNOWLODGE_MSG), 0,
-                            (struct sockaddr *) &client_sock_addr,
-                            client_sock_len);
-        if (bytes_send < 0)
-            error_handler("While sending data");
-        printf("Sent acknowledge msg: %li:bytes %s\n", bytes_send, 
-                                                       ACKNOWLODGE_MSG);
+        if (bytes_received != 0) {
+            bytes_send = sendto(udp_sock, ACKNOWLODGE_MSG, sizeof(ACKNOWLODGE_MSG), 0,
+                                (struct sockaddr *) &client_sock_addr,
+                                client_sock_len);
+            if (bytes_send < 0)
+                error_handler("While sending data");
+            printf("Sent acknowledge msg: %li:bytes %s\n", bytes_send, 
+                                                           ACKNOWLODGE_MSG);
+        }
     }
 
     close(udp_sock);

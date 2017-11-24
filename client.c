@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define SOCK_PORT       3000
+#define SOCK_PORT       3001
 #define BUF_SIZE        50
 #define CLIENT_MSG      "Hello, server, I'm here."
 

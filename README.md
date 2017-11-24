@@ -1,6 +1,6 @@
 # TCP/UDP server and client implementation
 
-This porject demonstrates realization of server-client communication
+This project demonstrates an implementation of the client-server communication
 based on different protocols: UDP or TCP.
 
 ## Getting Started
@@ -13,8 +13,7 @@ $ git clone https://github.com/VladPodilnyk/network-prog
 
 ### Build project
 
-Use make to build server and client. These examples below 
-shows different variant of usage Makefile.
+Use `make` to build server and client. Available options are listed below.
 ```
 $ make            # buld all
 $ make server     # build server
@@ -24,10 +23,6 @@ $ make del_client # delete client
 $ make clean      # delete all
 ```
 
-Don't forget to make script executable
-```
-$ chmod 755 debug.sh
-```
 ### Enjoy
 
 In order to debug you should run server and debug.sh in separate terminals using commands below.
